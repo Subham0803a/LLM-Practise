@@ -1,8 +1,14 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from google import genai
+from google.genai import types
+from dotenv import load_dotenv
+import os
 import torch
 import uvicorn
+
+load_dotenv()
 
 app = FastAPI(title="Prompting with LLMs")
 
@@ -12,6 +18,14 @@ model = GPT2LMHeadModel.from_pretrained("gpt2")
 
 # Set pad token (GPT-2 doesn't have one by default)
 tokenizer.pad_token = tokenizer.eos_token
+
+# 1. Setup Client for 2026 Stable v1
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY"),
+    http_options=types.HttpOptions(api_version="v1")
+)
+
+MODEL_NAME = "gemini-2.5-flash"
 
 class ZeroShotRequest(BaseModel):
     task: str  # summarization, translation, qa
